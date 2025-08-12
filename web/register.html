@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Register - Swiggy App</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      background: linear-gradient(120deg, #f093fb, #f5576c);
+      color: white;
+      text-align: center;
+      padding: 50px;
+    }
+    form {
+      background: white;
+      color: #333;
+      padding: 30px;
+      max-width: 400px;
+      margin: 0 auto;
+      border-radius: 10px;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.2);
+    }
+    input, button {
+      display: block;
+      width: 100%;
+      padding: 10px;
+      margin: 12px 0;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background-color: #e74c3c;
+      color: white;
+      font-weight: bold;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #c0392b;
+    }
+    #msg {
+      margin-top: 10px;
+      font-weight: bold;
+      color: red;
+    }
+    a {
+      color: #fff;
+      text-decoration: underline;
+    }
+  </style>
+
+  <script>
+    // ✅ Redirect if already logged in
+    if (sessionStorage.getItem('userId')) {
+      window.location = 'menu.html';
+    }
+  </script>
+</head>
+<body>
+
+  <h2>Register for Swiggy</h2>
+
+  <form id="reg">
+    <input name="name" placeholder="Full Name" required />
+    <input name="email" type="email" placeholder="Email" required />
+    <input name="password" type="password" placeholder="Password" required />
+    <button type="submit">Sign Up</button>
+  </form>
+
+  <p>Already have an account? <a href="login.html">Login here</a></p>
+  <div id="msg"></div>
+
+  <script>
+    document.getElementById('reg').onsubmit = e => {
+      e.preventDefault();
+      const f = e.target;
+      fetch('register', {
+        method: 'POST',
+        headers: {'Content-Type': 'application/x-www-form-urlencoded'},
+        body: `name=${encodeURIComponent(f.name.value)}&email=${encodeURIComponent(f.email.value)}&password=${encodeURIComponent(f.password.value)}`
+      })
+      .then(r => r.text())
+      .then(t => {
+        if (t.includes('successfully')) {
+          alert('Registered successfully! Please log in.');
+          window.location = 'login.html';
+        } else {
+          document.getElementById('msg').textContent = t;
+        }
+      });
+    };
+  </script>
+</body>
+</html>
+
+
