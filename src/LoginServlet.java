@@ -1,36 +1,38 @@
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
+package swiggy;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
 import java.io.*;
 import java.sql.*;
 
 @WebServlet("/login")
 public class LoginServlet extends HttpServlet {
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-
-        response.setContentType("text/plain");
-        PrintWriter out = response.getWriter();
-
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String email = req.getParameter("email");
+        String password = req.getParameter("password");
+        resp.setContentType("text/plain");
         try (Connection conn = DBConnection.getConnection()) {
-            String query = "SELECT password FROM users WHERE email = ?";
-            PreparedStatement ps = conn.prepareStatement(query);
+            String sel = "SELECT id, password FROM users WHERE email=?";
+            PreparedStatement ps = conn.prepareStatement(sel);
             ps.setString(1, email);
-
             ResultSet rs = ps.executeQuery();
-            if(rs.next()) {
-                String storedPass = rs.getString("password");
-                if(password.equals(storedPass)) {
-                    out.println("Login successful");
+            if (rs.next()) {
+                String stored = rs.getString("password");
+                int uid = rs.getInt("id");
+                if (password.equals(stored)) {
+                    HttpSession session = req.getSession();
+                    session.setAttribute("userId", uid);
+                    resp.getWriter().println("Login successful:" + uid);
                 } else {
-                    out.println("Invalid password");
+                    resp.getWriter().println("Invalid password");
                 }
             } else {
-                out.println("No user found");
+                resp.getWriter().println("No user found");
             }
         } catch (SQLException e) {
-            out.println("Error: " + e.getMessage());
+            resp.getWriter().println("Error: " + e.getMessage());
         }
     }
 }
+
