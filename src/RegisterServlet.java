@@ -1,36 +1,35 @@
-import javax.servlet.ServletException;
-import javax.servlet.annotation.WebServlet;
-import javax.servlet.http.*;
+package swiggy;
+
+import jakarta.servlet.ServletException;
+import jakarta.servlet.annotation.WebServlet;
+import jakarta.servlet.http.*;
 import java.io.*;
 import java.sql.*;
 
 @WebServlet("/register")
 public class RegisterServlet extends HttpServlet {
-    protected void doPost(HttpServletRequest request, HttpServletResponse response) throws ServletException, IOException {
-        String name = request.getParameter("name");
-        String email = request.getParameter("email");
-        String password = request.getParameter("password");
-
-        response.setContentType("text/plain");
-        PrintWriter out = response.getWriter();
-
+    protected void doPost(HttpServletRequest req, HttpServletResponse resp) throws ServletException, IOException {
+        String name = req.getParameter("name");
+        String email = req.getParameter("email");
+        String password = req.getParameter("password");
+        resp.setContentType("text/plain");
         try (Connection conn = DBConnection.getConnection()) {
-            String query = "INSERT INTO users (name, email, password) VALUES (?, ?, ?)";
-            PreparedStatement ps = conn.prepareStatement(query);
+            String ins = "INSERT INTO users (name,email,password) VALUES (?,?,?)";
+            PreparedStatement ps = conn.prepareStatement(ins, Statement.RETURN_GENERATED_KEYS);
             ps.setString(1, name);
             ps.setString(2, email);
             ps.setString(3, password);
-
             int row = ps.executeUpdate();
-            if(row > 0) {
-                out.println("Registered successfully");
+            if (row > 0) {
+                resp.getWriter().println("Registered successfully");
             } else {
-                out.println("Registration failed");
+                resp.getWriter().println("Registration failed");
             }
         } catch (SQLIntegrityConstraintViolationException e) {
-            out.println("Email already exists");
+            resp.getWriter().println("Email already exists");
         } catch (SQLException e) {
-            out.println("Error: " + e.getMessage());
+            resp.getWriter().println("Error: " + e.getMessage());
         }
     }
 }
+
