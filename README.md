@@ -1,52 +1,77 @@
-# 🍽 Online Food Ordering System
+# 🍽️ Swiggy – Online Food Ordering System
 
-A full-stack web project built using Java Servlets, JDBC, MySQL, and HTML/JavaScript.  
-It allows users to register, login, view a menu from the database, and place orders.
+> A full-stack Java-based web application simulating a real-world food ordering system, built using **Java Servlets**, **JDBC**, **MySQL**, and modern **HTML/CSS/JavaScript**.  
+> Designed to demonstrate backend integration, database design, and frontend-to-backend connectivity in a production-like environment.
+
+## 📌 Highlights
+
+✅ Fully functional **user registration** and **login system**  
+✅ Dynamic **menu display** from a MySQL database  
+✅ Seamless **order placement** flow using Java Servlets and JDBC  
+✅ Frontend powered by **HTML/CSS/JS** with **Fetch API** integration  
+✅ Secure database interactions with **prepared statements**  
+✅ Structured and modular **codebase** ready for extension  
 
 ---
 
 ## 💻 Tech Stack
 
-- Java (Servlets + JDBC)
-- HTML + CSS + JavaScript (Frontend)
-- MySQL (Database)
-- Apache Tomcat (Server)
+| Layer       | Technology           |
+|-------------|----------------------|
+| Backend     | Java Servlets (JEE), JDBC |
+| Frontend    | HTML, CSS, JavaScript |
+| Database    | MySQL                |
+| Server      | Apache Tomcat        |
+| IDE         | Eclipse / IntelliJ   |
+| Tools       | MySQL Workbench, Postman (for API testing) |
 
 ---
 
-## ✨ Features
+## 📂 Features Breakdown
 
-✅ User Registration & Login  
-✅ View Food Menu from MySQL  
-✅ Place Orders (User to Item)  
-✅ Frontend connected to backend via Fetch API
+| Feature               | Description                                                                 |
+|------------------------|-----------------------------------------------------------------------------|
+| 👤 User Auth           | Register & log in with credentials stored in MySQL                         |
+| 📋 Menu Management     | View all available food items from the database                             |
+| 🛒 Place Orders        | Submit orders by selecting item and quantity                                |
+| ⏱️ Order Timestamping  | Automatic tracking of order time using SQL `TIMESTAMP`                      |
+| 🔐 Security Practices  | Use of constraints & prepared statements to avoid SQL injection             |
 
 ---
 
-## 🛠 How to Run Locally
+## 🧱 Database Schema
 
-1. 🧱 Create MySQL Database: `food_ordering`  
-2. 📋 Create tables:
+**Database Name:** `swiggy`
 
 ```sql
+CREATE DATABASE IF NOT EXISTS swiggy;
+USE swiggy;
+
+-- Drop existing tables (optional)
+DROP TABLE IF EXISTS orders;
+DROP TABLE IF EXISTS menu;
+DROP TABLE IF EXISTS users;
+
+-- Users Table
 CREATE TABLE users (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  name VARCHAR(100),
-  email VARCHAR(100) UNIQUE,
-  password VARCHAR(100)
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    username VARCHAR(100) UNIQUE NOT NULL,
+    password VARCHAR(100) NOT NULL
 );
 
+-- Menu Table
 CREATE TABLE menu (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  item_name VARCHAR(100),
-  description TEXT,
-  price DECIMAL(10,2)
+    id INT PRIMARY KEY,
+    item_name VARCHAR(100) NOT NULL,
+    description TEXT,
+    price INT NOT NULL
 );
 
+-- Orders Table
 CREATE TABLE orders (
-  id INT AUTO_INCREMENT PRIMARY KEY,
-  user_id INT,
-  item_id INT,
-  FOREIGN KEY (user_id) REFERENCES users(id),
-  FOREIGN KEY (item_id) REFERENCES menu(id)
+    id INT AUTO_INCREMENT PRIMARY KEY,
+    item_id INT,
+    quantity INT,
+    order_time TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+    FOREIGN KEY (item_id) REFERENCES menu(id)
 );
