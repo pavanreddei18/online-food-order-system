@@ -1,0 +1,211 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <title>Your Orders</title>
+  <style>
+    body {
+      background: #f0f4f8;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      margin: 0;
+      padding: 0;
+    }
+    h2 {
+      text-align: center;
+      color: #2c3e50;
+      margin: 30px 0;
+      font-weight: 700;
+      font-size: 2.2rem;
+    }
+    #ordersContainer {
+      max-width: 1100px;
+      margin: 0 auto 50px;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 20px;
+      padding: 0 15px;
+    }
+    .order-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+      overflow: hidden;
+      display: flex;
+      flex-direction: column;
+      transition: transform 0.25s ease, box-shadow 0.25s ease;
+      cursor: default;
+      padding: 0;
+    }
+    .order-card:hover {
+      transform: translateY(-8px);
+      box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15);
+    }
+    .order-card img {
+      width: 100%;
+      height: 160px;
+      object-fit: cover;
+      border-bottom: 3px solid #e41c24;
+      transition: transform 0.3s ease;
+    }
+    .order-card:hover img {
+      transform: scale(1.05);
+    }
+    .order-details {
+      padding: 16px 18px;
+      flex-grow: 1;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+    .order-details h3 {
+      margin: 0 0 8px 0;
+      font-size: 1.25rem;
+      color: #222;
+    }
+    .order-details p {
+      margin: 5px 0;
+      color: #555;
+      font-weight: 600;
+    }
+    .price {
+      margin-top: 15px;
+      font-weight: 700;
+      font-size: 1.2rem;
+      color: #e41c24;
+    }
+    /* Buttons container */
+    .buttons-container {
+      text-align: center;
+      margin-bottom: 20px;
+    }
+    .buttons-container button {
+      padding: 10px 20px;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-right: 15px;
+      border: none;
+      border-radius: 6px;
+      background-color: #e41c24;
+      color: #fff;
+      transition: background-color 0.3s ease;
+    }
+    .buttons-container button:last-child {
+      margin-right: 0;
+      background-color: #3498db;
+    }
+    .buttons-container button:hover {
+      opacity: 0.9;
+    }
+  </style>
+</head>
+<body>
+  <h2>Your Orders</h2>
+
+  <div class="buttons-container">
+    <button id="logoutBtn">Logout</button>
+    <button id="menuBtn">Go to Menu</button>
+  </div>
+
+  <div id="ordersContainer">
+    <p style="text-align:center; color:#888;">Loading your orders...</p>
+  </div>
+
+  <script>
+    const images = {
+      1: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600&auto=format&fit=crop&q=60',
+      2: 'https://images.unsplash.com/photo-1426869981800-95ebf51ce900?w=600&auto=format&fit=crop&q=60',
+      3: 'https://images.unsplash.com/photo-1565958011703-44f9829ba187?auto=format&fit=crop&w=800&q=80',
+      4: 'https://images.unsplash.com/photo-1551121841-105758c58a6c?w=600&auto=format&fit=crop&q=60',
+      5: 'https://images.unsplash.com/photo-1498654364264-5e856b6bb047?w=600&auto=format&fit=crop&q=60',
+      6: 'https://images.unsplash.com/photo-1701579231305-d84d8af9a3fd?w=600&auto=format&fit=crop&q=60',
+      7: 'https://plus.unsplash.com/premium_photo-1730240724921-8de763b6d0d1?w=600&auto=format&fit=crop&q=60',
+      8: 'https://images.unsplash.com/photo-1589302168068-964664d93dc0?auto=format&fit=crop&w=800&q=80',
+      9: 'https://images.unsplash.com/photo-1668236543090-82eba5ee5976?w=600&auto=format&fit=crop&q=60',
+      10: 'https://images.unsplash.com/photo-1727280376746-b89107a5b0df?w=600&auto=format&fit=crop&q=60',
+    };
+
+    const fallbackImage = 'https://via.placeholder.com/600x400?text=Food+Image';
+
+    // Load and group orders
+    fetch('order')  // Adjust path if needed, e.g. '/order' or 'order' depending on your backend setup
+      .then(res => {
+        if (!res.ok) throw new Error('Failed to load orders');
+        return res.text();
+      })
+      .then(html => {
+        const container = document.getElementById('ordersContainer');
+        container.innerHTML = html;
+
+        const grouped = {};
+
+        container.querySelectorAll('.order-card').forEach(card => {
+          const id = card.dataset.itemId;
+          const name = card.querySelector('h3')?.textContent || '';
+          const priceText = card.querySelector('.price')?.textContent || '₹0';
+          const price = parseFloat(priceText.replace('₹', '')) || 0;
+
+          if (!grouped[id]) {
+            grouped[id] = {
+              count: 1,
+              card: card,
+              name: name,
+              price: price
+            };
+          } else {
+            grouped[id].count++;
+            grouped[id].price += price;
+          }
+        });
+
+        container.innerHTML = '';
+
+        Object.entries(grouped).forEach(([id, { count, card, name, price }]) => {
+          const img = document.createElement('img');
+          img.src = images[id] || fallbackImage;
+          img.alt = name;
+          card.innerHTML = '';
+          card.appendChild(img);
+
+          const detailsDiv = document.createElement('div');
+          detailsDiv.className = 'order-details';
+
+          const title = document.createElement('h3');
+          title.textContent = count > 1 ? `${name} × ${count}` : name;
+
+          const priceTag = document.createElement('p');
+          priceTag.className = 'price';
+          priceTag.textContent = count > 1 ? `Total: ₹${price.toFixed(2)}` : `₹${price.toFixed(2)}`;
+
+          detailsDiv.appendChild(title);
+          detailsDiv.appendChild(priceTag);
+          card.appendChild(detailsDiv);
+          container.appendChild(card);
+        });
+
+        if (Object.keys(grouped).length === 0) {
+          container.innerHTML = '<p style="text-align:center; color:#555;">No orders found.</p>';
+        }
+      })
+      .catch(err => {
+        document.getElementById('ordersContainer').innerHTML =
+          `<p style="color:red; text-align:center;">Error loading orders.</p>`;
+        console.error(err);
+      });
+
+
+    // LOGOUT BUTTON
+    document.getElementById('logoutBtn').addEventListener('click', () => {
+      sessionStorage.clear();         // Clear user session
+      window.location.href = 'login.html'; // Redirect to login page
+    });
+
+    // GO TO MENU BUTTON
+    document.getElementById('menuBtn').addEventListener('click', () => {
+      window.location.href = 'menu.html';  // Redirect to menu page
+    });
+  </script>
+</body>
+</html>
+
+
+
